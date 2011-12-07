@@ -54,7 +54,7 @@ class MainWindow(wx.Frame):
         self.buttonCancel = wx.Button(self,label=u"指定取り消し")
         self.buttonZip = wx.Button(self,label=u"圧縮開始")
         self.buttonFree = wx.Button(self,label=u"フォルダ選択解除")
-        self.buttonDelete = wx.Button(self,label=u"削除")
+        self.buttonDelete = wx.Button(self,label=u"オリジナルファイルの削除")
         self.sizer2.Add(self.buttonStart,1,wx.EXPAND)
         self.sizer2.Add(self.buttonEnd,1,wx.EXPAND)
         self.sizer2.Add(self.buttonCancel,1,wx.EXPAND)
@@ -121,12 +121,13 @@ class MainWindow(wx.Frame):
 
     def setDropedList(self,path):
         global dirPath,flist,startPath,endPath
+        originalFile = path
         if not os.path.isdir(path):
             print "this is not direcotry!!"
             ext = os.path.splitext(path)[1]
             if ext == ".zip":
                 print "zip!"
-              dirPath = unzip(path)
+                path = self.unzip(path)
             elif ext == ".rar":
                 print "rar!"
                 #unrar
@@ -192,9 +193,9 @@ class MainWindow(wx.Frame):
         self.selectCancel(None)
 
     def selectFree(self,e):
-        global dirPath
-        global fileList
+        global dirPath,fileList,originalFile
         dirPath = None
+        originalFile = None
         fileList.Set([""])
 
     def dclickList(self,e):
@@ -205,24 +206,36 @@ class MainWindow(wx.Frame):
 
     def selectDelete(self,e):
         global dirPath
-        if dirPath is None : 
+        if originalFile is None : 
             return
         dlg = wx.MessageDialog(self,dirPath+u"\n\nを本当に削除しますか？",u"確認",wx.OK|wx.CANCEL|wx.ICON_QUESTION)
         result = dlg.ShowModal()
         if result == wx.ID_OK :
             print "run"
-            shutil.rmtree(dirPath)
+            #shutil.rmtree(dirPath)
+            shutil.rmtree(originalFile)
             dirPath = None
             fileList.Set([""])
         else:
             print "canceled"
 
-    def unzip(path):
+    def unzip(self,path):
         if os.path.isdir("tmp"):
-            #os.remove(os.path.join("tmp","*"))
-            print (os.path.join("tmp","*"))
+            shutil.rmtree("tmp")
+            os.mkdir("tmp")
         else:
             os.mkdir("tmp")
+        targetZIP =  zipfile.ZipFile(path,"r")
+        print targetZIP.namelist()
+        for f in targetZIP.namelist():
+            if not os.path.basename(f):
+                os.mkdir(os.path.join("tmp",f))
+            else:
+                unzipFile = file(os.path.join("tmp",f),"wb")
+                unzipFile.write(targetZIP.read(f))
+                unzipFile.close()
+        targetZIP.close()
+        return os.path.abspath("tmp")
 
 
 
@@ -237,6 +250,7 @@ fileList = None
 flist = []
 trimelist = []
 dirPath = None
+originalFile = None
 app = wx.App(False)#Falseにすることで標準出力にエラーが表示される
 frame = MainWindow(None, u"ページピッカー")
 app.MainLoop()
