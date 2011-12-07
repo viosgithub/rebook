@@ -123,7 +123,15 @@ class MainWindow(wx.Frame):
         global dirPath,flist,startPath,endPath
         if not os.path.isdir(path):
             print "this is not direcotry!!"
-            return
+            ext = os.path.splitext(path)[1]
+            if ext == ".zip":
+                print "zip!"
+              dirPath = unzip(path)
+            elif ext == ".rar":
+                print "rar!"
+                #unrar
+            else:
+                return
 
         dirPath = path
         print dirPath
@@ -209,6 +217,14 @@ class MainWindow(wx.Frame):
         else:
             print "canceled"
 
+    def unzip(path):
+        if os.path.isdir("tmp"):
+            #os.remove(os.path.join("tmp","*"))
+            print (os.path.join("tmp","*"))
+        else:
+            os.mkdir("tmp")
+
+
 
 startIndex = None
 endIndex = None
@@ -221,6 +237,6 @@ fileList = None
 flist = []
 trimelist = []
 dirPath = None
-app = wx.App(False)
+app = wx.App(False)#Falseにすることで標準出力にエラーが表示される
 frame = MainWindow(None, u"ページピッカー")
 app.MainLoop()

@@ -1,3 +1,4 @@
+#coding:utf8
 import wx
 
 class FileDropTarget(wx.FileDropTarget):
@@ -11,9 +12,11 @@ class FileDropTarget(wx.FileDropTarget):
 
    def OnDropFiles(self, x, y, filenames):
       """ Implement File Drop """
+      #複数のファイルがドロップされた場合
       if len(filenames) is not 1:
-          print "Please drop a directory"
+          print "Please drop a directory or archive file(zip,rar)"
           return
+
       self.parent.setDropedList(filenames[0])
 
 
