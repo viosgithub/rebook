@@ -120,7 +120,7 @@ class MainWindow(wx.Frame):
         dlg.Destroy()
 
     def setDropedList(self,path):
-        global dirPath,flist,startPath,endPath
+        global dirPath,flist,startPath,endPath,originalFile
         originalFile = path
         if not os.path.isdir(path):
             print "this is not direcotry!!"
@@ -208,7 +208,7 @@ class MainWindow(wx.Frame):
         global dirPath
         if originalFile is None : 
             return
-        dlg = wx.MessageDialog(self,dirPath+u"\n\nを本当に削除しますか？",u"確認",wx.OK|wx.CANCEL|wx.ICON_QUESTION)
+        dlg = wx.MessageDialog(self,originalFile+u"\n\nを本当に削除しますか？",u"確認",wx.OK|wx.CANCEL|wx.ICON_QUESTION)
         result = dlg.ShowModal()
         if result == wx.ID_OK :
             print "run"
