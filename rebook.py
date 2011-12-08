@@ -226,15 +226,24 @@ class MainWindow(wx.Frame):
         else:
             os.mkdir("tmp")
         targetZIP =  zipfile.ZipFile(path,"r")
-        print targetZIP.namelist()
+        countMax = len(targetZIP.namelist())
+        count = 0
+        dlg = wx.ProgressDialog(u"ZIPを展開中...","",maximum = countMax,parent=self,
+                style = wx.PD_APP_MODAL|wx.PD_ELAPSED_TIME|wx.PD_REMAINING_TIME|wx.PD_AUTO_HIDE|wx.PD_SMOOTH)
+        dlg.SetSize((500,150))
+
         for f in targetZIP.namelist():
+            count+=1
             if not os.path.basename(f):
                 os.mkdir(os.path.join("tmp",f))
             else:
                 unzipFile = file(os.path.join("tmp",f),"wb")
+                dlg.Update(count,u"%s を解凍中" % f)
                 unzipFile.write(targetZIP.read(f))
                 unzipFile.close()
+
         targetZIP.close()
+        dlg.Destroy()
         return os.path.abspath("tmp")
 
 
