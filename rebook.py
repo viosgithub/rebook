@@ -124,7 +124,7 @@ class MainWindow(wx.Frame):
         originalFile = path
         if not os.path.isdir(path):
             print "this is not direcotry!!"
-            ext = os.path.splitext(path)[1]
+            ext = os.path.splitext(path)[1].lower()
             if ext == ".zip":
                 print "zip!"
                 path = self.unzip(path)
