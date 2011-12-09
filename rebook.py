@@ -109,6 +109,7 @@ class MainWindow(wx.Frame):
             dirPath = dlg.GetPath()
             print dirPath
             #os.chdir(dirPath)
+            #↓setDrop...と同様にos.walkを使うべき＊glob.globは日本語対応していない
             flist = glob.glob(os.path.join(dirPath,"*"))
             basenames = []
             for name in flist:
@@ -121,6 +122,7 @@ class MainWindow(wx.Frame):
 
     def setDropedList(self,path):
         global dirPath,flist,startPath,endPath,originalFile
+        print type(path)
         originalFile = path
         if not os.path.isdir(path):
             print "this is not direcotry!!"
@@ -137,7 +139,8 @@ class MainWindow(wx.Frame):
         dirPath = path
         print dirPath
         #os.chdir(dirPath)
-        flist = glob.glob(os.path.join(dirPath,"*"))
+        #flist = glob.glob(os.path.join(dirPath,"*"))
+        flist = self.getInDirFileList(dirPath)
         basenames = []
         for name in flist:
             basenames.append(os.path.basename(name))
@@ -245,6 +248,26 @@ class MainWindow(wx.Frame):
         targetZIP.close()
         dlg.Destroy()
         return os.path.abspath("tmp")
+
+    def unrar(self,path):
+        if os.path.isdir("tmp"):
+            shutil.rmtree("tmp")
+            os.mkdir("tmp")
+        else:
+            os.mkdir("tmp")
+
+        os.system("unrar %s" % path)
+
+    def getInDirFileList(self,dir):
+        ret = []
+        for root,dirs,files in os.walk(dir):
+            if root == dir:
+                for f in files:
+                    ret.append(os.path.join(dir,f))
+            else:
+                continue
+        return ret
+
 
 
 
