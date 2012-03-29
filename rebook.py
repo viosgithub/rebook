@@ -154,13 +154,13 @@ class MainWindow(wx.Frame):
         print flist[fileList.GetSelections()[0]]
         startIndex = fileList.GetSelections()[0]
         startPath = flist[fileList.GetSelections()[0]]
-        startStr.SetLabel("start: " + startPath)
+        startStr.SetLabel("start: " + os.path.basename(startPath))
     def selectEnd(self,e):
         global endPath,endIndex
         print flist[fileList.GetSelections()[0]]
         endIndex = fileList.GetSelections()[0]
         endPath = flist[fileList.GetSelections()[0]]
-        endStr.SetLabel("end: " + endPath)
+        endStr.SetLabel("end: " + os.path.basename(endPath))
     def selectCancel(self,e):
         global startPath,endPath,startIndex,endIndex
         startStr.SetLabel("start: ")
