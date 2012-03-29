@@ -49,20 +49,20 @@ class MainWindow(wx.Frame):
         self.sizer2 = wx.BoxSizer(wx.HORIZONTAL)
         self.sizer3 = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.buttonStart = wx.Button(self,label=u"開始ページ指定")
-        self.buttonEnd = wx.Button(self,label=u"終了ページ指定")
+        self.buttonStart = wx.Button(self,label=u"区間指定")
+        #self.buttonEnd = wx.Button(self,label=u"終了ページ指定")
         self.buttonCancel = wx.Button(self,label=u"指定取り消し")
         self.buttonZip = wx.Button(self,label=u"圧縮開始")
         self.buttonFree = wx.Button(self,label=u"フォルダ選択解除")
         self.buttonDelete = wx.Button(self,label=u"オリジナルファイルの削除")
         self.sizer2.Add(self.buttonStart,1,wx.EXPAND)
-        self.sizer2.Add(self.buttonEnd,1,wx.EXPAND)
+        #self.sizer2.Add(self.buttonEnd,1,wx.EXPAND)
         self.sizer2.Add(self.buttonCancel,1,wx.EXPAND)
         self.sizer2.Add(self.buttonZip,1,wx.EXPAND)
         self.sizer3.Add(self.buttonFree,1,wx.EXPAND)
         self.sizer3.Add(self.buttonDelete,1,wx.EXPAND)
         self.buttonStart.Bind(wx.EVT_BUTTON,self.selectStart)
-        self.buttonEnd.Bind(wx.EVT_BUTTON,self.selectEnd)
+        #self.buttonEnd.Bind(wx.EVT_BUTTON,self.selectEnd)
         self.buttonCancel.Bind(wx.EVT_BUTTON,self.selectCancel)
         self.buttonZip.Bind(wx.EVT_BUTTON,self.selectZip)
         self.buttonFree.Bind(wx.EVT_BUTTON,self.selectFree)
@@ -148,19 +148,69 @@ class MainWindow(wx.Frame):
         startPath = None
         endPath = None
 
-
-    def selectStart(self,e):
+    def setStart(self,index,path):
         global startPath,startIndex
-        print flist[fileList.GetSelections()[0]]
-        startIndex = fileList.GetSelections()[0]
-        startPath = flist[fileList.GetSelections()[0]]
+        startIndex = index
+        startPath = path
         startStr.SetLabel("start: " + os.path.basename(startPath))
+    def setEnd(self,index,path):
+        global endPath,endIndex
+        endIndex = index
+        endPath = path
+        endStr.SetLabel("end: " + os.path.basename(endPath))
+  
+
+    #need to cheange 
+    def selectStart(self,e):
+        global startIndex,endIndex
+        print flist[fileList.GetSelections()[0]]
+        selectedIndex = fileList.GetSelections()[0]
+        selectedPath = flist[fileList.GetSelections()[0]]
+        #開始も終了位置も選択されていない場合
+        if startIndex == None and endIndex == None:
+            self.setStart(selectedIndex,selectedPath)
+        #開始位置だけ選択されている場合
+        elif startIndex != None and endIndex == None:
+            if selectedIndex >= startIndex:
+                self.setEnd(selectedIndex,selectedPath)
+            else:
+                endIndex = startIndex
+                self.setEnd(endIndex,flist[endIndex])
+                self.setStart(selectedIndex,selectedPath)
+        #終了位置だけ選択されている場合（ありえないと思うので未実装）
+        elif startIndex == None and endIndex != None:
+            print u"エラー：想定外の選択です"
+        #開始，終了どちらも選択済みの場合
+        else:
+            if selectedIndex > endIndex:
+                self.setEnd(selectedIndex,selectedPath)
+                return
+            elif selectedIndex < startIndex:
+                self.setStart(selectedIndex,selectedPath)
+                return
+
+            dialog = wx.MessageDialog(None,u"Yesなら開始位置に，Noなら終了位置に設定します",
+                    u"開始位置か終了位置かを選んでください",
+                    wx.YES_NO | wx.ICON_QUESTION)
+            if dialog.ShowModal() == wx.ID_YES:
+                self.setStart(selectedIndex,selectedPath)
+            else:
+                self.setEnd(selectedIndex,selectedPath)
+            dialog.Destroy()
+
+
+
+
+
+
+    """
     def selectEnd(self,e):
         global endPath,endIndex
         print flist[fileList.GetSelections()[0]]
         endIndex = fileList.GetSelections()[0]
         endPath = flist[fileList.GetSelections()[0]]
         endStr.SetLabel("end: " + os.path.basename(endPath))
+    """
     def selectCancel(self,e):
         global startPath,endPath,startIndex,endIndex
         startStr.SetLabel("start: ")
@@ -206,6 +256,7 @@ class MainWindow(wx.Frame):
         self.fileList.SetItemBackgroundColour(fileList.GetSelections()[0],wx.Colour(0,255,255))
         self.fileList.Refresh()
         print "dclicked"
+        self.selectStart(e)
 
     def selectDelete(self,e):
         global dirPath
